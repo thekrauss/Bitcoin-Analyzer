@@ -1,5 +1,7 @@
 use error_chain::error_chain;
 use reqwest::Client;
+use reqwest::StatusCode;
+
 
 error_chain! {
     foreign_links {
@@ -21,8 +23,12 @@ async fn main() -> Result<()> {
         .send()
         .await?;
 
-    println!("Status: {}", res.status());
-    println!("Headers:\n{:#?}", res.headers());
+    if res.status() == StatusCode::OK {
+        println!("The API call worked. Status: {}", res.status());
+        println!("Headers:\n{:#?}", res.headers());
+    }else {
+        println!("API call failed with status: {}", res.status());
+    }
 
     let body = res.text().await?;
     println!("Body:\n{}", body);
