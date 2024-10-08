@@ -1,10 +1,19 @@
+/*
+ * Cette section importe les dépendances nécessaires pour faire des requêtes HTTP, manipuler les dates
+ * et gérer les erreurs. Ces bibliothèques facilitent l'appel à une API, la manipulation de dates, 
+ * ainsi que la désérialisation des données JSON.
+ */
 use reqwest::{Client, StatusCode};
 use serde::Deserialize;
-use tokio::time::Interval;
 use std::error::Error;
 use chrono::{NaiveDate, Duration};
 use crate::api_config::{get_api_key, BASE_URL};
 
+/*
+ * Structure `ExchangeRate`
+ * Cette structure représente un taux de change récupéré de l'API. Elle est dérivée avec `Deserialize`
+ * afin de pouvoir convertir le JSON en objets Rust facilement.
+ */
 #[derive(Debug, Deserialize)]
 pub struct ExchangeRate {
     pub time_period_start: String,
@@ -17,7 +26,12 @@ pub struct ExchangeRate {
     pub rate_close: f64,
 }
 
-
+/*
+ * Fonction `get_dates_intervals`
+ * Cette fonction divise une période de dates en plusieurs intervalles, chaque intervalle étant limité
+ * par un nombre maximum de jours. Cela est nécessaire pour appeler une API qui a une limitation sur 
+ * le nombre de jours que l'on peut interroger en une seule requête.
+ */
 pub fn get_dates_intervals(date_start: NaiveDate, date_end: NaiveDate, max_days: i64) -> Vec<(NaiveDate, NaiveDate)> {
     let mut intervals = Vec::new();
     let mut current_start = date_start;
@@ -36,8 +50,12 @@ pub fn get_dates_intervals(date_start: NaiveDate, date_end: NaiveDate, max_days:
     intervals // retourner la liste des intervalles
 }
 
-
-// appeler l'API pour les taux de change d'une période donnée
+/*
+ * Fonction `api_coin_exchange_rates`
+ * Cette fonction appelle l'API pour récupérer les taux de change pour une période spécifique.
+ * Elle construit une URL avec les dates de début et de fin, puis désérialise la réponse JSON en
+ * une liste de taux de change.
+ */
 pub async fn api_coin_exchange_rates(assets: &str, start: &str, end: &str) -> Result<Vec<ExchangeRate>, Box<dyn Error>> {
     let api_key = get_api_key();
     let client = Client::new();
@@ -67,7 +85,12 @@ pub async fn api_coin_exchange_rates(assets: &str, start: &str, end: &str) -> Re
     }
 }
 
-//  appeler l'API pour plusieurs intervalles de dates
+/*
+ * Fonction `api_coin_exchange_rates_extended`
+ * Cette fonction permet d'appeler l'API pour des périodes plus longues que la limite imposée (par exemple, 100 jours).
+ * Elle utilise la fonction `get_dates_intervals` pour diviser une période longue en sous-intervalles,
+ * puis fait des appels d'API pour chaque sous-intervalle et agrège les résultats.
+ */
 pub async fn api_coin_exchange_rates_extended(
     assets: &str,
     start: NaiveDate,
