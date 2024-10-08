@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
-use crate::api_coin_service::api_coin_exchange_rates;
+use crate::api_coin_service::{api_coin_exchange_rates_extended, get_dates_intervals};
+
+
 
 
 mod api_config;
@@ -37,20 +39,6 @@ fn save_json_data_to_file(filename: &str, json_data: &str) {
     file.write_all(json_data.as_bytes()).expect("Erreur lors de l'écriture du fichier");
 }
 
-fn get_dates_intervals(date_start: NaiveDate, date_end: NaiveDate, max_days: i64) -> Vec<(NaiveDate, NaiveDate)> {
-    let mut intervals = Vec::new();
-    let mut current_start = date_start;
-    let mut diff_date = (date_end - date_start).num_days();
-
-    while diff_date > 0 {
-        let interval_length = std::cmp::min(max_days - 1, diff_date);
-        let current_end = current_start + Duration::days(interval_length);
-        intervals.push((current_start, current_end));
-        current_start = current_end + Duration::days(1);
-        diff_date -= interval_length + 1
-    }
-    intervals
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -92,7 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for (start, end) in intervals  {
         println!("Intervals: {} - {}", start, end);
 
-        let rates_data = api_coin_exchange_rates(assets, &start.to_string(), &end.to_string()).await?;
+        let rates_data = api_coin_exchange_rates_extended(assets, date_start, date_end).await?;
         for rate in rates_data{
             rates.push(Rate { 
                 date: rate.time_period_start[..10].to_string(),
@@ -103,7 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let json_data =  get_json_rates(&rates);
     save_json_data_to_file(&data_filename, &json_data);
-    
+
     println!("{:?}", rates);
     println!("Data saved in {}", data_filename);
 
