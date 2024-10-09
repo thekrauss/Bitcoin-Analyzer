@@ -97,7 +97,7 @@ pub async fn get_and_manage_rates_data(assets: &str, date_start: NaiveDate, date
 
         } 
     } else {
-        println!("No data saved. Full recovery.");
+        println!("no data saved. Full recovery.");
         let rates_api = api_coin_exchange_rates_extended(assets, date_start, date_end).await?;
         rates = convert_exchange_rates_to_date_value_format(&rates_api);
         let json_data = get_json_rates(&rates);

@@ -7,12 +7,12 @@ mod api_coin_service;
 mod rates_data_manager;
 
 /*
- * Fonction principale
- * Elle exécute la gestion des taux de change en appelant `get_and_manage_rates_data`.
+ * fonction principale
+ *  exécute la gestion des taux de change en appelant `get_and_manage_rates_data`.
  */
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let date_start = NaiveDate::from_ymd_opt(2019, 1, 1).unwrap();
+    let date_start = NaiveDate::from_ymd_opt(2024, 6, 1).unwrap();
     let date_end = Utc::now().date_naive() - Duration::days(1);
     let assets = "BTC/EUR";
 

@@ -1,5 +1,5 @@
 /*
- * Cette section importe les dépendances nécessaires pour faire des requêtes HTTP, manipuler les dates
+ * cette section importe les dépendances nécessaires pour faire des requêtes HTTP, manipuler les dates
  * et gérer les erreurs. Ces bibliothèques facilitent l'appel à une API, la manipulation de dates, 
  * ainsi que la désérialisation des données JSON.
  */
@@ -11,8 +11,6 @@ use crate::api_config::{get_api_key, BASE_URL};
 
 /*
  * Structure `ExchangeRate`
- * Cette structure représente un taux de change récupéré de l'API. Elle est dérivée avec `Deserialize`
- * afin de pouvoir convertir le JSON en objets Rust facilement.
  */
 #[derive(Debug, Deserialize)]
 pub struct ExchangeRate {
@@ -27,8 +25,8 @@ pub struct ExchangeRate {
 }
 
 /*
- * Fonction `get_dates_intervals`
- * Cette fonction divise une période de dates en plusieurs intervalles, chaque intervalle étant limité
+ * fonction `get_dates_intervals`
+ *  divise une période de dates en plusieurs intervalles, chaque intervalle étant limité
  * par un nombre maximum de jours. Cela est nécessaire pour appeler une API qui a une limitation sur 
  * le nombre de jours que l'on peut interroger en une seule requête.
  */
@@ -37,7 +35,6 @@ pub fn get_dates_intervals(date_start: NaiveDate, date_end: NaiveDate, max_days:
     let mut current_start = date_start;
     let mut diff_days = (date_end - date_start).num_days(); // calcule la différence en jours
 
-    // tant qu'il reste des jours à diviser
     while diff_days > 0 {
         // déterminer combien de jours ajouter à cet intervalle (max_days ou moins)
         let interval_length = std::cmp::min(max_days - 1, diff_days);
@@ -51,16 +48,15 @@ pub fn get_dates_intervals(date_start: NaiveDate, date_end: NaiveDate, max_days:
 }
 
 /*
- * Fonction `api_coin_exchange_rates`
- * Cette fonction appelle l'API pour récupérer les taux de change pour une période spécifique.
- * Elle construit une URL avec les dates de début et de fin, puis désérialise la réponse JSON en
+ * fonction `api_coin_exchange_rates`
+ * cette fonction appelle l'API pour récupérer les taux de change pour une période spécifique.
+ * elle construit une URL avec les dates de début et de fin, puis désérialise la réponse JSON en
  * une liste de taux de change.
  */
 pub async fn api_coin_exchange_rates(assets: &str, start: &str, end: &str) -> Result<Vec<ExchangeRate>, Box<dyn Error>> {
     let api_key = get_api_key();
     let client = Client::new();
 
-    // URL pour les taux de change Bitcoin en Euro sur une période donnée
     let url = format!(
         "{}v1/exchangerate/{}/history?period_id=1DAY&time_start={}&time_end={}",
         BASE_URL, assets, start, end
@@ -73,9 +69,8 @@ pub async fn api_coin_exchange_rates(assets: &str, start: &str, end: &str) -> Re
         .await?;
 
     if res.status() == StatusCode::OK {
-        println!("The API call worked. Status: {}", res.status());
         let body = res.text().await?;
-        let rates: Vec<ExchangeRate> = serde_json::from_str(&body)?; // Désérialiser le JSON en une liste de taux de change
+        let rates: Vec<ExchangeRate> = serde_json::from_str(&body)?; 
         Ok(rates)
     } else {
         Err(Box::new(std::io::Error::new(
@@ -86,9 +81,9 @@ pub async fn api_coin_exchange_rates(assets: &str, start: &str, end: &str) -> Re
 }
 
 /*
- * Fonction `api_coin_exchange_rates_extended`
- * Cette fonction permet d'appeler l'API pour des périodes plus longues que la limite imposée (par exemple, 100 jours).
- * Elle utilise la fonction `get_dates_intervals` pour diviser une période longue en sous-intervalles,
+ * fonction `api_coin_exchange_rates_extended`
+ * cette fonction permet d'appeler l'API pour des périodes plus longues que la limite imposée (par exemple, 100 jours).
+ * elle utilise la fonction `get_dates_intervals` pour diviser une période longue en sous-intervalles,
  * puis fait des appels d'API pour chaque sous-intervalle et agrège les résultats.
  */
 pub async fn api_coin_exchange_rates_extended(
@@ -96,19 +91,19 @@ pub async fn api_coin_exchange_rates_extended(
     start: NaiveDate,
     end: NaiveDate,
 ) -> Result<Vec<ExchangeRate>, Box<dyn Error>> {
-    let intervals = get_dates_intervals(start, end, 100); // Diviser la période en intervalles de 100 jours
+    let intervals = get_dates_intervals(start, end, 100); //  la période en intervalles de 100 jours
     let mut all_rates = Vec::new();
 
-    // Appel API pour chaque intervalle
+    // appel API pour chaque intervalle
     for (start_interval, end_interval) in intervals {
         let start_str = start_interval.format("%Y-%m-%d").to_string();
         let end_str = end_interval.format("%Y-%m-%d").to_string();
 
         match api_coin_exchange_rates(assets, &start_str, &end_str).await {
-            Ok(rates) => all_rates.extend(rates), // Ajouter les taux récupérés à la liste complète
+            Ok(rates) => all_rates.extend(rates), // ajoute les taux récupérés à la liste complète
             Err(e) => println!("Error for interval {} - {} : {}", start_str, end_str, e),
         }
     }
 
-    Ok(all_rates) // Retourner tous les taux pour la période totale
+    Ok(all_rates) // retourner tous les taux pour la période totale
 }
