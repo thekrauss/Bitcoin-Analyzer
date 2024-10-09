@@ -74,11 +74,11 @@ pub async fn get_and_manage_rates_data(assets: &str, date_start: NaiveDate, date
         println!("  saved_data_date_start_str: {}", saved_data_date_start_str);
         println!("  saved_data_date_end_str: {}", saved_data_date_end_str);
 
-        // Conversion des dates sauvegardées en `NaiveDate`
+        // conversion des dates sauvegardées en `NaiveDate`
         let saved_data_date_start = NaiveDate::parse_from_str(saved_data_date_start_str, "%Y-%m-%d").expect("Date de début invalide");
         let saved_data_date_end = NaiveDate::parse_from_str(saved_data_date_end_str, "%Y-%m-%d").expect("Date de fin invalide");
 
-        // Vérifier s'il y a des jours manquants avant la période sauvegardée
+        // vérifie s'il y a des jours manquants avant la période sauvegardée
         let nb_days_start = (saved_data_date_start - date_start).num_days();
         if nb_days_start > 0 {
             println!("adding rates before : {} - {}", date_start, saved_data_date_start - Duration::days(1));
@@ -87,7 +87,7 @@ pub async fn get_and_manage_rates_data(assets: &str, date_start: NaiveDate, date
             rates = [rates_start_date_value, rates].concat(); // Ajouter les nouvelles données
         }
 
-                // Vérifier s'il y a des jours manquants après la période sauvegardée
+        // vérifie s'il y a des jours manquants après la période sauvegardée
         let nb_days_end = (date_end - saved_data_date_end).num_days();
         if nb_days_end > 0 {
             println!("add data after : {} - {}", saved_data_date_end + Duration::days(1), date_end);
