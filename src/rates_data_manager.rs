@@ -96,6 +96,10 @@ pub async fn get_and_manage_rates_data(assets: &str, date_start: NaiveDate, date
             rates.extend(rates_end_date_value); // ajouter les nouvelles données
 
         } 
+                // sauvegarder les données mises à jour dans le fichier JSON après avoir ajouté les nouvelles données
+        let json_data = get_json_rates(&rates);
+        save_json_data_to_file(&data_filename, &json_data);
+
     } else {
         println!("no data saved. Full recovery.");
         let rates_api = api_coin_exchange_rates_extended(assets, date_start, date_end).await?;

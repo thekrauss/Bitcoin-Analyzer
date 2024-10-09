@@ -12,7 +12,7 @@ mod rates_data_manager;
  */
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let date_start = NaiveDate::from_ymd_opt(2024, 6, 1).unwrap();
+    let date_start = NaiveDate::from_ymd_opt(2024, 8, 1).unwrap();
     let date_end = Utc::now().date_naive() - Duration::days(1);
     let assets = "BTC/EUR";
 
