@@ -51,7 +51,7 @@ fn save_json_data_to_file(filename: &str, json_data: &str) {
 fn convert_exchange_rates_to_date_value_format(rates_data: &Vec<crate::api_coin_service::ExchangeRate>) -> Vec<Rate> {
     rates_data.iter().map(|r| Rate {
         date: r.time_period_start[..10].to_string(), 
-        value: r.rate_close, // taux de clôture
+        value: r.rate_close, 
     }).collect()
 }
 
@@ -60,7 +60,7 @@ pub async fn get_and_manage_rates_data(assets: &str, date_start: NaiveDate, date
 
     //let mut rates: Vec<Rate> = Vec::new();
 
-    // Charger les données JSON à partir du fichier si le fichier existe
+    // charger les données JSON à partir du fichier si le fichier existe
     let mut rates: Vec<Rate> = Vec::new();
     if Path::new(&data_filename).exists() {
         rates = load_json_data_from_file(&data_filename); 

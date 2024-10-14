@@ -48,11 +48,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let date_end = Utc::now().date_naive() - Duration::days(1);
     let assets = "BTC/EUR";
 
-        // récupére les taux de change
     let rates = get_and_manage_rates_data(assets, date_start, date_end).await?;
     println!("Number of rates recovered: {}", rates.len());
 
-        // extraire les dates et les valeurs des tau
+        // extraire les dates et les valeurs des taux
         let rates_dates: Vec<NaiveDate> = rates.iter().map(|r| NaiveDate::parse_from_str(&r.date, "%Y-%m-%d").unwrap()).collect();
         let rates_values: Vec<f64> = rates.iter().map(|r| r.value.clone()).collect();
 
